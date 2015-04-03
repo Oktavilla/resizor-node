@@ -21,7 +21,7 @@ Would yield something like:
 
 ## Constructor
 
-The constructor takes two arguments: `fileStream` and `options`. Example and available options:
+The constructor takes two arguments: `apiKey` and `options`. Example and available options:
 ```javascript
 var resizor = new Resizor("apikey", {
   "useSSL": true,
