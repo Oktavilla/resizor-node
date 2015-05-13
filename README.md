@@ -33,11 +33,11 @@ var resizor = new Resizor("apikey", {
 
 ## "addAsset" method
 
-addAssets takes a single argument: `fileStream`. It will return a promise. Upon success it will be resolved with data regarding the newly created asset.
+addAssets takes the arguments: `fileBuffer`, `fileName` and `contentType`. ContentType must be the valid mime type of the asset you're uploading. It will return a promise. Upon success it will be resolved with data regarding the newly created asset.
 
 Example:
 ```javascript
-var addAsset = resizor.addAsset(fileStream);
+var addAsset = resizor.addAsset(fileBuffer, fileName, contentType);
 addAsset.then(function(assetData) {
   console.log(assetData);
 });
