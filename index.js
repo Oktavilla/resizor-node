@@ -65,19 +65,20 @@ function Resizor(apiKey, options) {
   };
 
   // Add an asset
-  this.addAsset = Q.Promise(function(fileStream) {
-    if (fileStream) {
+  this.addAsset = function(fileBuffer) {
+    var deferred = Q.defer();
+    if (fileBuffer) {
       request.post({
         url: getApiURL() + "/assets.json",
         formData: {
-          "file": fileStream,
+          "file": fileBuffer,
           "api_key": this.apiKey
         }
       }, function(err, httpResponse, data) {
         if (err) {
-          reject(new Error("Could not add asset"));
+          deferred.reject(new Error("Could not add asset"));
         } else {
-          resolve({
+          deferred.resolve({
             id: data.asset.id,
             name: data.asset.name + data.asset.extension,
             mimeType: data.asset["mime_type"],
@@ -88,12 +89,15 @@ function Resizor(apiKey, options) {
         }
       })
     } else {
-      reject(new Error("Missing file stream"));
+      deferred.reject(new Error("Missing file stream"));
     }
-  });
+
+    return deferred.promise;
+  };
 
   // Delete an asset
-  this.deleteAsset = Q.Promise(function(id) {
+  this.deleteAsset = function(id) {
+    var deferred = Q.defer();
     if (id && typeof id === "string") {
       request.del({
         url: getApiURL() + "/assets/" + id + ".json",
@@ -102,15 +106,16 @@ function Resizor(apiKey, options) {
         }
       }, function(err, httpResponse) {
         if (err) {
-          reject(new Error("Could not delete asset with id: " + id));
+          deferred.reject(new Error("Could not delete asset with id: " + id));
         } else {
-          resolve();
+          deferred.resolve();
         }
       });
     } else {
-      reject(new Error("Missing or malformed id"));
+      deferred.reject(new Error("Missing or malformed id"));
     }
-  });
+    return deferred.promise;
+  };
 
   // Set options
   this.set = function(options) {
