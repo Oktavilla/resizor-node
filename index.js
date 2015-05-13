@@ -8,7 +8,7 @@ var request = require("request");
 var defaultOptions = {
   apiHost: "resizor.com",
   apiPort: "80",
-  useSSL: true,
+  useSSL: false,
   CDNHost: null
 };
 
@@ -65,31 +65,38 @@ function Resizor(apiKey, options) {
   };
 
   // Add an asset
-  this.addAsset = function(fileBuffer) {
+  this.addAsset = function(fileBuffer, fileName, contentType) {
     var deferred = Q.defer();
     if (fileBuffer) {
       request.post({
         url: getApiURL() + "/assets.json",
         formData: {
-          "file": fileBuffer,
+          "file": {
+            value: fileBuffer,
+            options: {
+              filename: fileName,
+              contentType: contentType
+            }
+          },
           "api_key": this.apiKey
         }
       }, function(err, httpResponse, data) {
-        if (err) {
-          deferred.reject(new Error("Could not add asset"));
-        } else {
+        if (data) {
+          var asset = JSON.parse(data).asset;
           deferred.resolve({
-            id: data.asset.id,
-            name: data.asset.name + data.asset.extension,
-            mimeType: data.asset["mime_type"],
-            size: data.asset["file_size"],
-            width: data.asset.width,
-            height: data.asset.height
+            id: asset.id,
+            name: asset.name + asset.extension,
+            mimeType: asset["mime_type"],
+            size: asset["file_size"],
+            width: asset.width,
+            height: asset.height
           });
+        } else {
+          deferred.reject(new Error("Could not add asset"));
         }
       })
     } else {
-      deferred.reject(new Error("Missing file stream"));
+      deferred.reject(new Error("Missing file buffer"));
     }
 
     return deferred.promise;
